@@ -1,5 +1,5 @@
 server:
-  port: @server.port@
+  port: '@server.port@'
 management:
   security:
     flag: false
@@ -9,10 +9,26 @@ management:
         flavor: etsy
 spring:
   application:
-    name: @project.name@
+    name: '@project.name@'
   output:
     ansi:
       enabled: always
 info:
-  version: @project.version@
+  version: '@project.version@'
   stage: dev
+service:
+  mg:
+    automaton:
+      url: http://localhost:8080/v1/automaton
+      namespace: schedulator
+    eventSink:
+      url: http://localhost:8022/v1/event_sink
+      sinkId: schedulator
+    networkTimeout: 5000
+  dominant:
+    url: http://dominant:8022/v1/domain/repository_client
+    networkTimeout: 5000
+retry-policy:
+  maxAttempts: 10
+cache:
+  maxSize: 100
