@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>schedulator</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.2-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>Schedulator</name>
@@ -22,8 +22,10 @@
         <java.version>11</java.version>
         <server.port>8022</server.port>
         <exposed.ports>${server.port}</exposed.ports>
-        <dockerfile.base.service.tag>0d28a0d8a1074fbe7b1555ef195cbccf7f4f8806</dockerfile.base.service.tag>
-        <shared.resources.version>0.3.3</shared.resources.version>
+        <dockerfile.base.service.tag>bc95d0d6dc13c693acd2b274531a7d604b877bf3</dockerfile.base.service.tag>
+        <dockerfile.registry>${env.REGISTRY}</dockerfile.registry>
+        <sonar.jacoco.reportPath>${project.basedir}/target/jacoco.exec</sonar.jacoco.reportPath>
+        <shared.resources.version>0.3.6</shared.resources.version>
         <woody-thrift.version>1.1.15</woody-thrift.version>
         <schedulator-proto.version>1.14-eecbfda</schedulator-proto.version>
         <machinarium.version>0.2.8</machinarium.version>
@@ -160,6 +162,23 @@
                     <execution>
                         <goals>
                             <goal>process</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.2</version>
+                <configuration>
+                    <destFile>${sonar.jacoco.reportPath}</destFile>
+                    <append>true</append>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
                         </goals>
                     </execution>
                 </executions>
