@@ -44,7 +44,8 @@ public class SchedulatorHandler implements SchedulatorSrv.Iface {
         }
 
         List<TMachineEvent<ScheduleChange>> events = automatonClient.getEvents(scheduleId);
-        if (isScheduleContextValidated(events)) {
+        log.info("ScheduleId '{}' events: {}", scheduleId, events);
+        if (!isScheduleContextValidated(events)) {
             throw new IllegalStateException("Incorrect state of machine " + scheduleId);
         }
 
@@ -69,6 +70,6 @@ public class SchedulatorHandler implements SchedulatorSrv.Iface {
     }
 
     private boolean isScheduleContextValidated(List<TMachineEvent<ScheduleChange>> events) {
-        return events.size() == 2 || events.get(1).getData().isSetScheduleContextValidated();
+        return events.size() >= 2 && events.get(1).getData().isSetScheduleContextValidated();
     }
 }
