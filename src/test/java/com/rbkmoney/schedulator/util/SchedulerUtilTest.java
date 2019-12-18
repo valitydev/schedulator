@@ -7,8 +7,10 @@ import com.cronutils.model.time.ExecutionTime;
 import com.cronutils.parser.CronParser;
 import com.opencsv.CSVReader;
 import com.rbkmoney.damsel.base.*;
+import com.rbkmoney.damsel.domain.BusinessSchedule;
 import com.rbkmoney.damsel.domain.Calendar;
 import com.rbkmoney.damsel.domain.CalendarHoliday;
+import com.rbkmoney.schedulator.ScheduleTestData;
 import com.rbkmoney.schedulator.cron.DateAdjuster;
 import com.rbkmoney.schedulator.cron.ExcludeHolidayAdjuster;
 import org.junit.Assert;
@@ -38,8 +40,8 @@ public class SchedulerUtilTest {
 
     @BeforeClass
     public static void setUp() throws Exception {
-        calendar = buildTestCalendar();
-        excludeHolidayAdjuster = new ExcludeHolidayAdjuster(calendar);
+        calendar = ScheduleTestData.buildTestCalendar();
+        excludeHolidayAdjuster = new ExcludeHolidayAdjuster(calendar, 2018);
     }
 
     @Test
@@ -199,39 +201,6 @@ public class SchedulerUtilTest {
         } catch (IllegalArgumentException e) {
             return false;
         }
-    }
-
-    public static Calendar buildTestCalendar() throws IOException {
-        Calendar calendar = new Calendar();
-        calendar.setName("test-calendar");
-        calendar.setTimezone("Europe/Moscow");
-
-        ClassPathResource resource = new ClassPathResource("/data/calendar-test.csv");
-        try (CSVReader reader = new CSVReader(new InputStreamReader(resource.getInputStream()))) {
-            reader.readNext();
-
-            String[] row;
-            Map<Integer, Set<CalendarHoliday>> years = new HashMap<>();
-            while ((row = reader.readNext()) != null) {
-                Set<CalendarHoliday> calendarHolidays = new HashSet<>();
-                for (int monthValue = 1; monthValue <= 12; monthValue++) {
-                    Month month = Month.findByValue(monthValue);
-                    for (String day : row[monthValue].split(",")) {
-                        if (!day.endsWith("*")) {
-                            CalendarHoliday holiday = new CalendarHoliday();
-                            holiday.setName("holiday");
-                            holiday.setDay(Byte.parseByte(day));
-                            holiday.setMonth(month);
-                            calendarHolidays.add(holiday);
-                        }
-                    }
-                }
-                int year = Integer.parseInt(row[0]);
-                years.put(year, calendarHolidays);
-            }
-            calendar.setHolidays(years);
-        }
-        return calendar;
     }
 
 }
