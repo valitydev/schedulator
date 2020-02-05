@@ -13,6 +13,7 @@ import com.rbkmoney.machinegun.stateproc.TimerAction;
 import com.rbkmoney.machinegun.stateproc.UnsetTimerAction;
 import com.rbkmoney.schedulator.exception.NotFoundException;
 import com.rbkmoney.schedulator.service.ScheduleJobService;
+import com.rbkmoney.schedulator.service.impl.ScheduleJobCalculateException;
 import com.rbkmoney.schedulator.util.TimerActionHelper;
 import com.rbkmoney.woody.api.flow.error.WUnavailableResultException;
 import com.rbkmoney.woody.api.flow.error.WUndefinedResultException;
@@ -54,17 +55,22 @@ public class MgProcessorHandler extends AbstractProcessorHandler<ScheduleChange,
         ScheduleContextValidated scheduleContextValidated = validateRemoteContext(scheduleJobRegistered);
 
         // Calculate next execution time
-        ScheduleChange scheduleChangeValidated = ScheduleChange.schedule_context_validated(scheduleContextValidated);
-        ScheduledJobContext scheduledJobContext = scheduleJobService.calculateScheduledJobContext(scheduleJobRegistered);
-        ComplexAction complexAction = TimerActionHelper.buildTimerAction(scheduledJobContext.getNextFireTime());
-        log.info("Timer action: {}", complexAction);
-        SignalResultData<ScheduleChange> signalResultData = new SignalResultData<>(
-                Value.nl(new Nil()),
-                Arrays.asList(scheduleChangeRegistered, scheduleChangeValidated),
-                complexAction);
-        log.info("Response of processSignalInit: {}", signalResultData);
+        try {
+            ScheduleChange scheduleChangeValidated = ScheduleChange.schedule_context_validated(scheduleContextValidated);
+            ScheduledJobContext scheduledJobContext = scheduleJobService.calculateScheduledJobContext(scheduleJobRegistered);
+            ComplexAction complexAction = TimerActionHelper.buildTimerAction(scheduledJobContext.getNextFireTime());
+            log.info("Timer action: {}", complexAction);
+            SignalResultData<ScheduleChange> signalResultData = new SignalResultData<>(
+                    Value.nl(new Nil()),
+                    Arrays.asList(scheduleChangeRegistered, scheduleChangeValidated),
+                    complexAction);
+            log.info("Response of processSignalInit: {}", signalResultData);
 
-        return signalResultData;
+            return signalResultData;
+        } catch (ScheduleJobCalculateException e) {
+            log.error("Failed to calculate schedule", e);
+            throw new WUndefinedResultException("Failed to calculate schedule", e);
+        }
     }
 
     @Override
@@ -144,6 +150,7 @@ public class MgProcessorHandler extends AbstractProcessorHandler<ScheduleChange,
         try {
             return client.validateExecutionContext(context);
         } catch (Exception e) {
+            log.error("Call remote client failed", e);
             throw new WUnavailableResultException(e);
         }
     }
