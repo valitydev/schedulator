@@ -26,7 +26,7 @@
         <dockerfile.registry>${env.REGISTRY}</dockerfile.registry>
         <schedulator-proto.version>1.11-efc08c2</schedulator-proto.version>
         <machinarium.version>0.3.0</machinarium.version>
-        <cronutils.version>9.0.1</cronutils.version>
+        <cronutils.version>9.1.6</cronutils.version>
         <caffeine.version>2.8.1</caffeine.version>
     </properties>
 
